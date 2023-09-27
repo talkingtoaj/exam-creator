@@ -1,6 +1,6 @@
-# Exam Generator
+# Exam-Creator
 
-Unique is a simple program to create randomized exams so each student receives a unique set of questions.
+Exam-Creator is a simple program to create randomized exams so each student receives a unique set of questions.
 
 ## Why?
 
