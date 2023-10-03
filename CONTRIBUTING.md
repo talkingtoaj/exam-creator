@@ -1,4 +1,4 @@
-First off, thank you for considering contributing to Exam-Creator. It’s people like you that make Exam-Creator such a great tool.
+First off, thank you for considering contributing to Unique-Exams. It’s people like you that make Unique-Exams such a great tool.
 
 # How to report a bug
 

@@ -23,7 +23,6 @@ def load_in_template(filename)->dict:
 
     mode = 'common'
     for i, paragraph in enumerate(template_doc.paragraphs):
-        # if paragraph text contains `Alternatif Soru`...
         print(f"{i}:{mode}:       {paragraph.text[:45]}")
         if ALTERNATIVE_TEXT.lower() in paragraph.text.lower():
             if mode == 'common':
@@ -34,7 +33,7 @@ def load_in_template(filename)->dict:
             else:
                 # we save the current alternative
                 alternatives.append(alternative_content)
-                print(f"Detected next Alternatif Soru")
+                print(f"Detected next alternative choice")
             mode = 'choice'
             alternative_content = [] # we are starting a new alternative
             continue # we don't save the header
@@ -190,30 +189,30 @@ if __name__ == '__main__':
     # new_exams = int(input("How many new exams do you want to generate? "))
     new_exams = 3
     print(os.getcwd())
-    if "exam_creator" in os.getcwd():
+    if "unique_exams" in os.getcwd():
         INPUT_FOLDER = os.path.join(os.getcwd(), "input")
         OUTPUT_FOLDER = os.path.join(os.getcwd(), "output")
     else:
-        # add to path exam_creator
-        INPUT_FOLDER = os.path.join(os.getcwd(), "exam_creator", "input")
-        OUTPUT_FOLDER = os.path.join(os.getcwd(), "exam_creator", "output")
-    examiner_path = os.path.join(INPUT_FOLDER, "JRSPA - Examiner Version - simplified.docx")
-    student_path = os.path.join(INPUT_FOLDER, "JRSPA - Student Version.docx")
-    examiner_loaded_content = load_in_template(examiner_path)
-    student_loaded_content = load_in_template(student_path)
-
-    examiner_structure = [len(choice['alternatives']) for choice in examiner_loaded_content['choices']]
-    student_structure = [len(choice['alternatives']) for choice in student_loaded_content['choices']]
-    if examiner_structure != student_structure:
-        raise Exception("The structure of the examiner and student versions are not the same. Please check the files")
+        INPUT_FOLDER = os.path.join(os.getcwd(), "unique_exams", "input")
+        OUTPUT_FOLDER = os.path.join(os.getcwd(), "unique_exams", "output")
     
+    exam_names = [f for f in os.listdir(INPUT_FOLDER) if f.endswith(".docx")]    
+    exam_paths = [os.path.join(INPUT_FOLDER, f) for f in exam_names]
+    # remove file endings
+    exam_names = [os.path.splitext(f)[0] for f in exam_names]
+    loaded_contents = [load_in_template(os.path.join(INPUT_FOLDER, f)) for f in exam_paths]
+    exam_structures = []
+    for loaded_content in loaded_contents:
+        exam_structures.append([len(choice['alternatives']) for choice in loaded_content['choices']])
+    for i in range(len(exam_structures)):
+        if exam_structures[i] != exam_structures[0]:
+            raise Exception("The structure of the exam versions are not the same. Please check the files")
     for i in range(new_exams):
-        choices = make_choices(student_loaded_content)
+        choices = make_choices(loaded_contents[0])
         hash = to_hash(choices)
         reversed_from_hash = from_hash(hash)
         print (f"Choices: {choices} -> {hash} -> {reversed_from_hash}")
-        # choices is an array like [3,0,2,5], we now convert this into a reversable hash
-        examiner_output_path = os.path.join(OUTPUT_FOLDER, f"Examiner version {hash}.docx")
-        student_output_path = os.path.join(OUTPUT_FOLDER, f"Student version {hash}.docx")
-        create_new_document(student_loaded_content, choices, student_output_path, original=student_path)
-        create_new_document(examiner_loaded_content, choices, examiner_output_path, original=examiner_path)
+        for j, loaded_content in enumerate(loaded_contents):
+            exam_name = exam_names[j]
+            output_path = os.path.join(OUTPUT_FOLDER, f"{exam_name} - version {hash}.docx")
+            create_new_document(loaded_content, choices, output_path, original=exam_paths[j])

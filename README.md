@@ -1,6 +1,6 @@
-# Exam-Creator
+# Unique-Exams
 
-Exam-Creator is a simple program to create randomized exams so each student receives a unique set of questions.
+Unique-Exams is a simple program to create randomized exams so each student receives a unique set of questions.
 
 ## Why?
 
@@ -24,9 +24,13 @@ Run `poetry install`
 
 ### Usage
 
-Put your template files in the `input` folder, following the "Exam Layout guide"
+Have a look at the sample template files provided in the `input` folder to see the expected format. 
 
-Run `python exam_creator/main.py`
+You can Follow the TEMPLATE_DESIGN.md guide to design your own templates. Remove the sample files and add your own template files to the `input` folder.
+
+Modify config.py to reflect the text you want to use for placeholders for the Alternate questions.
+
+Run `python unique_exams/main.py`
 
 Generated exams will be placed in the `output` folder
 

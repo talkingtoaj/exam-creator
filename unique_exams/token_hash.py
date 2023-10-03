@@ -1,10 +1,10 @@
 import random
+from config import SEED
 
 HEX_ENCODING1 = "aeiouAEIOU"
 HEX_ENCODING2 = "bcdghjklmnprstvwxyz"
 HEX_ENCODING3 = "BCDGHJKLMNPRSTVWXYZ-#$%&*+./0123456789:<=>?@^_~!'(){}[]|\\öäüÖÄÜßÖÄÜĞğİıŞşÇç"
 HEX_ENCODINGS = [HEX_ENCODING1, HEX_ENCODING2, HEX_ENCODING3]
-SEED = [0,2,1,3,0,1,2,0,3]
 
 def value_to_char(value:int)->str:
     # each HEX_ENCODING substring is unique. We select an encoding string randomly, weighted towards the earlier strings. 
