@@ -5,6 +5,7 @@ from typing import List
 from config import ALTERNATIVE_TEXT, END_ALTERNATIVES
 from token_hash import to_hash, from_hash
 
+PAGE_BREAK_TOKEN = "\n"
 def load_in_template(filename)->dict:
     """ loads in the content of the file to memory, takes note of the choices and where they begin and end, returns a dict with all the loaded content """
     # Output format of dict `loaded_content`
@@ -48,6 +49,11 @@ def load_in_template(filename)->dict:
                 })
                 mode = 'common'
                 print(f"Detected end of choices")
+                if PAGE_BREAK_TOKEN in paragraph.text:
+                    # remove end alternatives text, keep only page break
+                    paragraph.text = PAGE_BREAK_TOKEN
+                    alternative_content.append(paragraph)
+
             else:
                 # add paragraph to current choice
                 alternative_content.append(paragraph)
@@ -165,24 +171,30 @@ def add_style(target_document, target_paragraph, source_style):
 def add_paragraph(target_document, source_paragraph):
     """ Attempt to copy all formatting over from the original paragraph to a new paragraph appended at the end of the target document """
     print(f"Adding: {source_paragraph.text:40}")
-    new_paragraph = target_document.add_paragraph()
-    add_style(target_document, new_paragraph, source_paragraph.style)
+    new_paragraph = None
     # copy runs across (text and formatting as it varies throughout the paragraph)
     for run in source_paragraph.runs:
-        new_run = new_paragraph.add_run(run.text)
-        new_run.bold = run.bold
-        new_run.italic = run.italic
-        new_run.underline = run.underline
-        new_run.font.name = run.font.name
-        new_run.font.size = run.font.size
-        new_run.font.color.rgb = run.font.color.rgb
+        if run.text == PAGE_BREAK_TOKEN:
+            target_document.add_page_break()
+        else:
+            if new_paragraph is None:
+                new_paragraph = target_document.add_paragraph()
+            new_run = new_paragraph.add_run(run.text)
+            new_run.bold = run.bold
+            new_run.italic = run.italic
+            new_run.underline = run.underline
+            new_run.font.name = run.font.name
+            new_run.font.size = run.font.size
+            new_run.font.color.rgb = run.font.color.rgb
     # copy paragraph formatting across
-    format = new_paragraph.paragraph_format
-    source_f = source_paragraph.paragraph_format
-    for attribute in ["first_line_indent", "keep_together", "keep_with_next", "left_indent", 
-                    "line_spacing", "line_spacing_rule", "page_break_before", "right_indent", 
-                    "space_after", "space_before", "widow_control"]:
-        setattr(format, attribute, getattr(source_f, attribute))
+    if new_paragraph is not None:
+        add_style(target_document, new_paragraph, source_paragraph.style)
+        format = new_paragraph.paragraph_format
+        source_f = source_paragraph.paragraph_format
+        for attribute in ["first_line_indent", "keep_together", "keep_with_next", "left_indent", 
+                        "line_spacing", "line_spacing_rule", "page_break_before", "right_indent", 
+                        "space_after", "space_before", "widow_control"]:
+            setattr(format, attribute, getattr(source_f, attribute))
     return new_paragraph
 
 if __name__ == '__main__':
